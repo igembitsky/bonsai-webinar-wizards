@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonsai Webinar Wizards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --dark: #0a0f1c;
+    --dark-mid: #141b2d;
+    --accent: #00c2ff;
+    --accent-glow: rgba(0, 194, 255, 0.15);
+    --text: #e4e8f1;
+    --text-muted: #8892a8;
+    --surface: #161d30;
+    --surface-border: rgba(255,255,255,0.06);
+    --white: #ffffff;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    background: var(--dark);
+    background-image: var(--grain);
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===================== ANIMATIONS ===================== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes glow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+  }
+  @keyframes softBounce {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50% { transform: translateY(6px); opacity: 0.7; }
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes btnGlow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  /* Data-anim system */
+  [data-anim] {
+    opacity: 0;
+    transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+  }
+  [data-anim="fade-up"] { transform: translateY(32px); }
+  [data-anim="fade-up"].visible { opacity: 1; transform: translateY(0); }
+
+  [data-anim="fade-in"] { }
+  [data-anim="fade-in"].visible { opacity: 1; }
+
+  [data-anim="scale-up"] { transform: scale(0.92); }
+  [data-anim="scale-up"].visible { opacity: 1; transform: scale(1); transition-timing-function: var(--ease-out-back); }
+
+  [data-anim="fade-left"] { transform: translateX(-24px); }
+  [data-anim="fade-left"].visible { opacity: 1; transform: translateX(0); }
+
+  [data-anim="fade-right"] { transform: translateX(24px); }
+  [data-anim="fade-right"].visible { opacity: 1; transform: translateX(0); }
+
+  /* ===================== LAYOUT ===================== */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  section { padding: 96px 0; }
+
+  /* ===================== SECTION DIVIDERS ===================== */
+  .section-divided {
+    position: relative;
+    border-top: none;
+    border-bottom: none;
+  }
+  .section-divided::before,
+  .section-divided::after {
+    content: '';
+    position: absolute;
+    left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--surface-border), transparent);
+  }
+  .section-divided::before { top: 0; }
+  .section-divided::after { bottom: 0; }
+
+  /* ===================== NAV ===================== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 28px;
+    background: rgba(10, 15, 28, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--surface-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-brand {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--white);
+    letter-spacing: -0.3px;
+  }
+  .nav-brand span { color: var(--accent); }
+  .nav-cta {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 8px 20px;
+    border: 1px solid rgba(0, 194, 255, 0.3);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+  .nav-cta:hover {
+    background: var(--accent);
+    color: var(--dark);
+  }
+
+  /* ===================== HERO ===================== */
+  .hero {
+    padding: 180px 0 120px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    animation: glow 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    animation: fadeIn 0.6s ease-out 0.1s both;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    color: var(--white);
+    max-width: 720px;
+    margin: 0 auto 24px;
+    animation: fadeUp 0.7s var(--ease-out-expo) 0.35s both;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: var(--text-muted);
+    max-width: 540px;
+    margin: 0 auto;
+    animation: fadeUp 0.7s var(--ease-out-expo) 0.6s both;
+  }
+  .hero-scroll-hint {
+    margin-top: 48px;
+    animation: softBounce 2.5s ease-in-out 1.5s infinite both;
+    color: var(--accent);
+    font-size: 1.2rem;
+    opacity: 0;
+  }
+
+  /* ===================== TRUST BAR ===================== */
+  .trust-bar {
+    padding: 36px 0;
+    text-align: center;
+  }
+  .trust-bar .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+  .trust-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .trust-stat .number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -1px;
+  }
+  .trust-stat .label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* ===================== VALUE PROP ===================== */
+  .value-section { padding: 80px 0 72px; }
+  .value-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .value-grid h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .value-grid h2 span { color: var(--accent); }
+  .value-text p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .value-text p + p { margin-top: 16px; }
+  .value-highlight {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: var(--accent-glow);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ===================== SERVICES ===================== */
+  .services-section {
+    background: var(--dark-mid);
+  }
+  .services-header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .services-header h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .services-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  .services-group-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    margin-top: 48px;
+    padding-left: 12px;
+    border-left: 3px solid var(--accent);
+  }
+  .services-group-label:first-of-type { margin-top: 0; }
+  .services-group-label[data-phase="during"] { color: #a78bfa; border-left-color: #7c3aed; }
+  .services-group-label[data-phase="after"] { color: #6ee7b7; border-left-color: #10b981; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .service-card {
+    position: relative;
+    padding: 24px 24px 24px 28px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-left: 3px solid rgba(0, 194, 255, 0.2);
+    border-radius: 10px;
+    transition: all 0.35s var(--ease-out-expo);
+  }
+  .service-card:hover {
+    border-left-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+  [data-phase="during"] + .services-grid .service-card {
+    border-left-color: rgba(124, 58, 237, 0.2);
+  }
+  [data-phase="during"] + .services-grid .service-card:hover {
+    border-left-color: #7c3aed;
+  }
+  [data-phase="after"] + .services-grid .service-card {
+    border-left-color: rgba(16, 185, 129, 0.2);
+  }
+  [data-phase="after"] + .services-grid .service-card:hover {
+    border-left-color: #10b981;
+  }
+  .service-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .service-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ===================== VIDEO ===================== */
+  .video-section {
+    text-align: center;
+    padding: 72px 0;
+  }
+  .video-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .video-section > .container > p {
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    font-size: 1rem;
+  }
+  .video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--surface-border);
+  }
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+
+  /* ===================== TIMELINE ===================== */
+  .timeline-section {
+    background: var(--dark-mid);
+  }
+  .timeline-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .timeline-section > .container > p {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 56px;
+  }
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+  }
+  .timeline-line {
+    position: absolute;
+    top: 24px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 2px;
+    background: var(--accent);
+    transform-origin: left;
+    transform: scaleX(0);
+    opacity: 0.5;
+    transition: transform 1.5s var(--ease-out-expo);
+  }
+  .timeline-line.visible { transform: scaleX(1); }
+  .timeline-step {
+    text-align: center;
+    position: relative;
+  }
+  .timeline-dot {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin: 18px auto 20px;
+    box-shadow: 0 0 16px var(--accent-glow);
+    position: relative;
+    z-index: 2;
+  }
+  .timeline-week {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .timeline-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .timeline-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    max-width: 180px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* ===================== PRICING ===================== */
+  .pricing-section { text-align: center; }
+  .pricing-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 40px;
+  }
+  .price-card {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-radius: 16px;
+    padding: 56px 64px;
+    max-width: 520px;
+    position: relative;
+    overflow: visible;
+  }
+  .price-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, var(--accent), #7c3aed, var(--accent));
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.6;
+  }
+  .price-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .price-amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -2px;
+  }
+  .price-per {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .price-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 400px;
+  }
+  .price-includes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .price-includes span::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  /* ===================== ROI ===================== */
+  .roi-bar {
+    text-align: center;
+    padding: 48px 0;
+    background: var(--dark-mid);
+  }
+  .roi-bar p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .roi-bar p + p { margin-top: 12px; }
+  .roi-bar strong { color: var(--white); }
+
+  /* ===================== CTA ===================== */
+  .cta-section {
+    text-align: center;
+    padding: 112px 0 140px;
+  }
+  .cta-section h2 {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .cta-section p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 32px;
+  }
+  .btn-primary {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--dark);
+    text-decoration: none;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: all 0.3s var(--ease-out-expo);
+    box-shadow: 0 4px 20px rgba(0, 194, 255, 0.25);
+    position: relative;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    box-shadow: 0 0 24px rgba(0, 194, 255, 0.3);
+    animation: btnGlow 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 194, 255, 0.4);
+  }
+
+  /* ===================== FOOTER ===================== */
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--surface-border);
+  }
+  footer strong { color: var(--white); font-weight: 600; }
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  footer a:hover { opacity: 0.7; }
+  footer .footer-sub {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: #555e73;
+  }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 768px) {
+    .value-grid { grid-template-columns: 1fr; gap: 32px; }
+    .trust-bar .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px 32px;
+      justify-items: center;
+    }
+    /* Timeline: vertical left-aligned */
+    .timeline {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding-left: 24px;
+    }
+    .timeline-line { display: none; }
+    .timeline::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 5px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), transparent);
+      opacity: 0.3;
+    }
+    .timeline-step {
+      text-align: left;
+      padding-left: 24px;
+      padding-bottom: 32px;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -24px;
+      top: 4px;
+      margin: 0;
+    }
+    .timeline-desc { margin: 0; max-width: none; }
+    .price-card { padding: 40px 28px; }
+    section { padding: 72px 0; }
+    .hero { padding: 140px 0 80px; }
+    .cta-section { padding: 80px 0 96px; }
+    .video-section { padding: 56px 0; }
+    .value-section { padding: 64px 0 56px; }
+  }
+  @media (max-width: 480px) {
+    .timeline { grid-template-columns: 1fr; gap: 0; }
+    .services-grid { grid-template-columns: 1fr; }
+    .price-amount { font-size: clamp(2.5rem, 8vw, 3.5rem); }
+    .hero { padding: 120px 0 64px; }
+    .btn-primary { padding: 16px 36px; min-height: 44px; }
+    .nav-cta { min-height: 44px; display: inline-flex; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Bonsai <span>Webinar Wizards</span></div>
+  <a class="nav-cta" href="https://calendar.app.google/r8nHR1SQsozG78sm9">Book a call</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Turnkey Webinar Production for B2B Teams</div>
+    <h1>Stop planning webinars. Start running them.</h1>
+    <p class="hero-sub">You bring the speakers. We handle everything else — setup, production, streaming, and a polished podcast after.</p>
+    <div class="hero-scroll-hint" aria-hidden="true">&#8595;</div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar section-divided">
+  <div class="container">
+    <div class="trust-stat" data-anim="fade-up" data-delay="0">
+      <div class="number" data-count="50" data-suffix="+">50+</div>
+      <div class="label">Events Produced</div>
+    </div>
+    <div class="trust-stat" data-anim="fade-up" data-delay="100">
+      <div class="number" data-count="0" data-suffix="">0</div>
+      <div class="label">Technical Failures</div>
+    </div>
+    <div class="trust-stat" data-anim="fade-up" data-delay="200">
+      <div class="number" data-count="100" data-suffix="%">100%</div>
+      <div class="label">Client Retention</div>
+    </div>
+    <div class="trust-stat" data-anim="fade-up" data-delay="300">
+      <div class="number" data-count="2" data-suffix="x">2x</div>
+      <div class="label">Content Per Session</div>
+    </div>
+  </div>
+</div>
+
+<!-- VALUE PROPOSITION -->
+<section class="value-section">
+  <div class="container">
+    <div class="value-grid">
+      <div data-anim="fade-left">
+        <h2>Webinars without the <span>headaches</span></h2>
+      </div>
+      <div class="value-text" data-anim="fade-right">
+        <p>You've probably shelved webinars because of the planning overhead — speaker coordination, tech setup, streaming, graphics. It adds up to weeks of work for one event.</p>
+        <p>We take all of that off your plate. Your team shows up, has a great conversation, and walks away with a finished webinar and a podcast.</p>
+        <div class="value-highlight">Every webinar ships with a professionally edited podcast version. One session, two pieces of content.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section section-divided">
+  <div class="container">
+    <div class="services-header" data-anim="fade-up">
+      <h2>Full-service production. One flat rate.</h2>
+      <p>No setup fees. No per-attendee charges. No surprises.</p>
+    </div>
+
+    <div class="services-group-label" data-phase="before" data-anim="fade-in">Before the event</div>
+    <div class="services-grid">
+      <div class="service-card" data-anim="fade-up" data-delay="0">
+        <h3>Full Technical Management</h3>
+        <p>We set up, configure, and launch your event from start to finish.</p>
+      </div>
+      <div class="service-card" data-anim="fade-up" data-delay="80">
+        <h3>Speaker Coordination</h3>
+        <p>Personalized emails and join links for every speaker, so they just show up ready to go.</p>
+      </div>
+      <div class="service-card" data-anim="fade-up" data-delay="160">
+        <h3>Audio-Visual Checks</h3>
+        <p>Pre-event sound and camera checks with every speaker. Nothing left to chance.</p>
+      </div>
+      <div class="service-card" data-anim="fade-up" data-delay="240">
+        <h3>Pre-Roll Branding</h3>
+        <p>A custom branded video loop plays before the stream starts, setting a professional tone.</p>
+      </div>
+    </div>
+
+    <div class="services-group-label" data-phase="during" data-anim="fade-in">During the event</div>
+    <div class="services-grid">
+      <div class="service-card" data-anim="fade-up" data-delay="0">
+        <h3>Multi-Platform Streaming</h3>
+        <p>Live broadcast across all your social media channels simultaneously.</p>
+      </div>
+      <div class="service-card" data-anim="fade-up" data-delay="80">
+        <h3>On-Screen Graphics & Slides</h3>
+        <p>Branded speaker IDs, sponsor graphics, and seamless slide integration.</p>
+      </div>
+      <div class="service-card" data-anim="fade-up" data-delay="160">
+        <h3>Live Tech Support</h3>
+        <p>Our team is on standby throughout the broadcast to resolve any issues in real time.</p>
+      </div>
+    </div>
+
+    <div class="services-group-label" data-phase="after" data-anim="fade-in">After the event</div>
+    <div class="services-grid">
+      <div class="service-card" data-anim="fade-up" data-delay="0">
+        <h3>Post-Event Podcast</h3>
+        <p>A professionally edited podcast version delivered after the event, ready to publish.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section class="video-section">
+  <div class="container" data-anim="scale-up">
+    <h2>See a full production</h2>
+    <p>Live discussion and Q&A with real-time graphics, multi-speaker coordination, and slide integration.</p>
+    <div class="video-wrapper">
+      <iframe src="https://www.youtube.com/embed/s6IJxEKYBSE" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline-section section-divided">
+  <div class="container">
+    <h2 data-anim="fade-up">From zero to live in three weeks</h2>
+    <p data-anim="fade-up">Here's what the process looks like. Your total time commitment: about 2 hours.</p>
+    <div class="timeline">
+      <div class="timeline-line"></div>
+      <div class="timeline-step" data-anim="fade-up" data-delay="0">
+        <div class="timeline-week">Week 1</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-title">Kickoff</div>
+        <div class="timeline-desc">You send topic, speakers, and brand assets. We handle the rest.</div>
+      </div>
+      <div class="timeline-step" data-anim="fade-up" data-delay="150">
+        <div class="timeline-week">Week 2</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-title">Prep & Review</div>
+        <div class="timeline-desc">We finalize graphics, slides, and run speaker sound checks.</div>
+      </div>
+      <div class="timeline-step" data-anim="fade-up" data-delay="300">
+        <div class="timeline-week">Week 3</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-title">Go Live</div>
+        <div class="timeline-desc">Webinar day. You show up and talk. We run everything behind the scenes.</div>
+      </div>
+      <div class="timeline-step" data-anim="fade-up" data-delay="450">
+        <div class="timeline-week">Week 4</div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-title">Deliverables</div>
+        <div class="timeline-desc">Edited podcast and replay video delivered, ready to publish.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section">
+  <div class="container">
+    <h2 data-anim="fade-up">One price. Everything included.</h2>
+    <div class="price-card" data-anim="scale-up">
+      <div class="price-badge">Fully Managed</div>
+      <div class="price-amount">$1,000</div>
+      <div class="price-per">per webinar</div>
+      <div class="price-desc">A low-risk way to test the format without committing internal resources to planning and production.</div>
+      <div class="price-includes">
+        <span>No setup fees</span>
+        <span>Unlimited pre-event revisions on graphics</span>
+        <span>Podcast version included</span>
+        <span>Multi-platform streaming included</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI BAR -->
+<div class="roi-bar section-divided">
+  <div class="container" data-anim="fade-in">
+    <p><strong>The DIY alternative:</strong> Coordinate speakers over email. Research streaming tools. Build your own graphics. Troubleshoot someone's mic five minutes before go-live. Spend a week editing.</p>
+    <p>Or: <strong>$1,000 and about 2 hours of your time</strong>.</p>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container" data-anim="fade-up">
+    <h2>Book your first webinar</h2>
+    <p>15 minutes. No pitch, just logistics. We'll figure out if this is a fit.</p>
+    <a class="btn-primary" href="https://calendar.app.google/r8nHR1SQsozG78sm9">Schedule a call</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <strong>Bonsai Webinar Wizards</strong>
+  <br>
+  Igor Gembitsky &middot; <a href="https://linkedin.com/in/gembitsky">LinkedIn</a>
+  <div class="footer-sub">Turnkey webinar production for B2B teams</div>
+</footer>
+
+<!-- SCROLL ANIMATIONS -->
+<script>
+  // Deterministic stagger animation observer
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const delay = parseInt(entry.target.dataset.delay || '0', 10);
+        setTimeout(() => entry.target.classList.add('visible'), delay);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('[data-anim]').forEach(el => observer.observe(el));
+
+  // Timeline line draw
+  const timelineLine = document.querySelector('.timeline-line');
+  if (timelineLine) {
+    const lineObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          timelineLine.classList.add('visible');
+          lineObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    lineObserver.observe(timelineLine);
+  }
+
+  // Trust bar count-up animation
+  function animateCountUp(el) {
+    const target = parseInt(el.dataset.count, 10);
+    const suffix = el.dataset.suffix || '';
+    if (isNaN(target)) return;
+    const duration = 1200;
+    const start = performance.now();
+    el.textContent = '0' + suffix;
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const trustObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.number[data-count]').forEach(n => animateCountUp(n));
+        trustObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const trustBar = document.querySelector('.trust-bar');
+  if (trustBar) trustObserver.observe(trustBar);
+</script>
+
+</body>
+</html>
